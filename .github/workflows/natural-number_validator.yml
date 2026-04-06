@@ -1,27 +1,29 @@
-name: Natural Number Test
+name: Natural Number Check System
 
 on: [push]
 
 jobs:
-  test_job:
+  check_logic: # Bu adı dəyişdik ki, köhnə ilə qarışmasın
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Natural eded yoxlamasi
+      - name: Yoxlama Merhelesi
         run: |
-          # Burada yeni fayli yoxlayiriq
-          for n in $(cat test_ededler.txt); do
-            if [[ ! "$n" =~ ^[0-9]+$ ]] || [ "$n" -eq 0 ]; then
-              echo "XETA: '$n' natural deyil!"
+          echo "Natural eded yoxlanilir..."
+          for n in $(cat ballar.txt); do
+            # Əgər ədəd natural deyilsə (məsələn 15.5 və ya -5), sistem burada QIRMIZI olacaq
+            if [[ ! "$n" =~ ^[0-9]+$ ]] || [ "$n" -le 0 ]; then
+              echo "Səhv tapıldı: '$n' natural ədəd deyil!"
               exit 1
             fi
           done
-          echo "Test ugurlu oldu."
+          echo "Təbriklər! Hamısı naturaldır."
 
-      - name: Tek ve Cut ayirma
+      - name: Tek ve Cut Ayirici
+        if: success()
         run: |
           echo "Tekler:"
-          awk '$1 % 2 != 0' test_ededler.txt
+          awk '$1 % 2 != 0' ballar.txt
           echo "Cutler:"
-          awk '$1 % 2 == 0' test_ededler.txt
+          awk '$1 % 2 == 0' ballar.txt
