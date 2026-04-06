@@ -1,0 +1,62 @@
+name: Professional Academic Pipeline
+
+on: [push]
+
+jobs:
+  # 1-Cİ HİSSƏ: TEST YOXLAMASI
+  Test_Yoxlamasi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Faylın mövcudluğunu yoxla
+        run: |
+          if [ ! -f ballar.txt ]; then
+            echo "XETA: ballar.txt faylı tapılmadı!"
+            exit 1
+          fi
+
+      - name: Formatın düzgünlüyünü yoxla
+        run: |
+          # Faylda yalnız rəqəmlərin olduğunu yoxlayır
+          if grep -q '[^0-9[:space:]]' ballar.txt; then
+            echo "XETA: Faylda qeyri-rəqəm simvollar var!"
+            exit 1
+          else
+            echo "Test uğurla keçdi: Fayl formatı düzgündür."
+          fi
+
+  # 2-Cİ HİSSƏ: ANALİZ VƏ HESABAT (Yalnız Test keçərsə işləyir)
+  Analiz_ve_Hesabat:
+    needs: Test_Yoxlamasi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hesablama və Hesabat
+        run: |
+          BALLAR=$(cat ballar.txt)
+          SURET=0
+          SAY=0
+          A_SAYI=0
+          
+          for i in $BALLAR; do
+            SURET=$((SURET + i))
+            SAY=$((SAY + 1))
+            [ $i -ge 91 ] && A_SAYI=$((A_SAYI + 1))
+          done
+          
+          ORTA=$((SURET / SAY))
+          
+          if [ $ORTA -ge 91 ] && [ $A_SAYI -eq $SAY ]; then STATUS="ELACI"
+          elif [ $ORTA -ge 71 ]; then STATUS="ZERBECI"
+          elif [ $ORTA -ge 51 ]; then STATUS="ADI"
+          else STATUS="KESR"; fi
+          
+          echo -e "--- AKADEMİK HESABAT ---\nOrtalama: $ORTA\nStatus: $STATUS" > report.txt
+          
+      - name: Hesabatı Yüklə
+        uses: actions/upload-artifact@v4
+        with:
+          name: Professional-Report
+          path: report.txt
