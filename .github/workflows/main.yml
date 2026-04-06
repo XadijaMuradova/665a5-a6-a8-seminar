@@ -1,0 +1,44 @@
+name: Academic CI-CD from File
+
+on: [push]
+
+jobs:
+  Analiz_CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read and Analyze
+        run: |
+          BALLAR=($(cat ballar.txt))
+          SURET=0
+          A_SAYI=0
+          for i in "${BALLAR[@]}"; do
+            SURET=$((SURET + i))
+            [ $i -ge 91 ] && A_SAYI=$((A_SAYI + 1))
+          done
+          ORTA=$((SURET / 5))
+          if [ $ORTA -ge 91 ] && [ $A_SAYI -eq 5 ]; then
+            echo "STATUS=ELACI" >> $GITHUB_ENV
+          elif [ $ORTA -ge 71 ] && [ $A_SAYI -ge 1 ]; then
+            echo "STATUS=ZERBECI" >> $GITHUB_ENV
+          elif [ $ORTA -ge 51 ]; then
+            echo "STATUS=ADI" >> $GITHUB_ENV
+          else
+            echo "KESR: Proses dayandırıldı."
+            exit 1
+          fi
+          echo "YEKUN_BAL=$ORTA" >> $GITHUB_ENV
+
+  Hesabat_CD:
+    needs: Analiz_CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Report
+        run: |
+          echo "Ortalama: ${{ env.YEKUN_BAL }}" > report.txt
+          echo "Status: ${{ env.STATUS }}" >> report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Final-Results
+          path: report.txt
