@@ -1,41 +1,27 @@
-name: CI Natural Number Validator and Splitter
+name: Natural Number Test
 
 on: [push]
 
 jobs:
-  check_and_split:
+  test_job:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: CI Tehlukesizlik Yoxlamasi (Natural Eded Filteri)
+      - name: Natural eded yoxlamasi
         run: |
-          echo "--- CI/CD VALIDATION REPORT ---" > validation_log.txt
-          for n in $(cat ballar.txt); do
-            # Regex: Yalnız tam müsbət rəqəmləri qəbul edir
-            if [[ ! "$n" =~ ^[0-9]+$ ]] || [ "$n" -le 0 ]; then
-              echo "CRITICAL ERROR: '$n' natural eded deyil! CI dayanmali idi." >> validation_log.txt
-              echo "Sistem dayandirilir: $n uygun deyil."
+          # Burada yeni fayli yoxlayiriq
+          for n in $(cat test_ededler.txt); do
+            if [[ ! "$n" =~ ^[0-9]+$ ]] || [ "$n" -eq 0 ]; then
+              echo "XETA: '$n' natural deyil!"
               exit 1
             fi
           done
-          echo "SUCCESS: Butun ededler naturaldir." >> validation_log.txt
+          echo "Test ugurlu oldu."
 
-      - name: Analiz ve Qruplasdirma (Tek/Cut)
-        if: success() # Yalnız yuxarıdakı test keçərsə işləyir
+      - name: Tek ve Cut ayirma
         run: |
-          echo -e "\n--- TEK VE CUT QRUPLARI ---" >> validation_log.txt
-          
-          echo "Tekler:" >> validation_log.txt
-          awk '$1 % 2 != 0 {print "- " $1}' ballar.txt >> validation_log.txt
-          
-          echo -e "\nCutler:" >> validation_log.txt
-          awk '$1 % 2 == 0 {print "- " $1}' ballar.txt >> validation_log.txt
-          
-          cat validation_log.txt
-
-      - name: Hesabati Arxivle
-        uses: actions/upload-artifact@v4
-        with:
-          name: CI-Validation-Report
-          path: validation_log.txt
+          echo "Tekler:"
+          awk '$1 % 2 != 0' test_ededler.txt
+          echo "Cutler:"
+          awk '$1 % 2 == 0' test_ededler.txt
