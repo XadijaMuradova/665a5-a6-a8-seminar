@@ -3,7 +3,6 @@ name: Professional Academic Pipeline
 on: [push]
 
 jobs:
-  # 1-Cİ HİSSƏ: TEST YOXLAMASI
   Test_Yoxlamasi:
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +17,6 @@ jobs:
 
       - name: Formatın düzgünlüyünü yoxla
         run: |
-          # Faylda yalnız rəqəmlərin olduğunu yoxlayır
           if grep -q '[^0-9[:space:]]' ballar.txt; then
             echo "XETA: Faylda qeyri-rəqəm simvollar var!"
             exit 1
@@ -26,7 +24,6 @@ jobs:
             echo "Test uğurla keçdi: Fayl formatı düzgündür."
           fi
 
-  # 2-Cİ HİSSƏ: ANALİZ VƏ HESABAT (Yalnız Test keçərsə işləyir)
   Analiz_ve_Hesabat:
     needs: Test_Yoxlamasi
     runs-on: ubuntu-latest
