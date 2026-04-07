@@ -43,6 +43,8 @@ jobs:
             [ $i -ge 91 ] && A_SAYI=$((A_SAYI + 1))
           done
           
+          if [ $SAY -eq 0 ]; then echo "Məlumat tapılmadı"; exit 1; fi
+          
           ORTA=$((SURET / SAY))
           
           if [ $ORTA -ge 91 ] && [ $A_SAYI -eq $SAY ]; then STATUS="ELACI"
