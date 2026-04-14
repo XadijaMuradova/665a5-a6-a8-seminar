@@ -14,14 +14,6 @@ RESULT:
 - Logic format: CHECKED
 - CI/CD Pipeline: SUCCESS
 
-Summary:
-This report confirms that the submitted mathematical proof
-passed automated validation checks in CI pipeline.
-
-Note:
-This is an automated generated report (CI/CD simulation).
-"""
-
     with open("dist/report.txt", "w") as f:
         f.write(report_content)
 
