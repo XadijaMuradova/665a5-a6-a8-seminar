@@ -6,7 +6,7 @@ def validate_proof(file_path):
         with open(file_path, 'r') as f:
             content = f.read().lower()
 
-        # structure check
+ 
         required_keywords = ["theorem", "proof", "let", "so"]
         for word in required_keywords:
             if word not in content:
