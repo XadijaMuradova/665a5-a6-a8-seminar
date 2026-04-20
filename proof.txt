@@ -1,6 +1,7 @@
-Theorem: Sum of two even numbers is even.
+Theorem: The sum of two even numbers is even.
 
 Proof:
-Let a = 2k and b = 2m
-Then a + b = 2k + 2m = 2(k + m)
-So the sum is even.
+Let a = 2k and b = 2m, where k, m are integers.
+Then a + b = 2k + 2m = 2(k + m).
+Since 2(k + m) is divisible by 2, the sum is even.
+So the theorem is proved. ∎
