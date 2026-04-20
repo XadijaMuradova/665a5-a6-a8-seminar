@@ -76,7 +76,6 @@ def validate_math() -> bool:
     print("\n[PASS] Bütün riyazi yoxlamalar keçdi ✓\n")
     return True
 
-
 def generate_ci_report(struct_ok: bool, math_ok: bool):
     os.makedirs("reports", exist_ok=True)
 
