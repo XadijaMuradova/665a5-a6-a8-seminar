@@ -7,28 +7,51 @@ on:
     branches: [ main ]
 
 jobs:
-  CI_Test:
-    name: CI - Proof Validation
+  Build_Test:
+    name: "CI — Theorem Proof Validation"
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install sympy reportlab
+        run: |
+          python -m pip install --upgrade pip
+          pip install sympy
 
-      - name: Run proof checker
-        run: python check_proof.py
+      - name: Check proof file exists
+        run: |
+          if [ ! -f proof.txt ]; then
+            echo "[FAIL] proof.txt tapılmadı!"
+            exit 1
+          fi
+          echo "[OK] proof.txt mövcuddur"
 
-  CD_Deploy:
-    name: CD - Report Generation & Deploy Simulation
-    needs: CI_Test
+      - name: Validate proof structure
+        run: python check_proof.py --mode=structure
+
+      - name: Validate proof mathematics
+        run: python check_proof.py --mode=math
+
+      - name: Generate CI validation report
+        run: python check_proof.py --mode=report
+
+      - name: Upload CI validation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-proof-validation
+          path: reports/
+          retention-days: 7
+
+  Build_Deploy:
+    name: "CD — Report Generation & Deploy Simulation"
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -36,32 +59,63 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install sympy reportlab
+        run: |
+          python -m pip install --upgrade pip
+          pip install sympy
 
       - name: Create dist folder
         run: mkdir -p dist
 
-      - name: Generate PDF report
+      - name: Run full proof validation
+        run: python check_proof.py --mode=full
+
+      - name: Generate proof report
         run: python generate_report.py
 
-      - name: Show output files
-        run: ls -R dist
+      - name: Create release manifest
+        run: |
+          python - <<'EOF'
+          import json, datetime, os
 
-      - name: Upload artifact
+          manifest = {
+              "project"    : "math-theorem-proof",
+              "version"    : "1.0.${{ github.run_number }}",
+              "commit"     : "${{ github.sha }}"[:7],
+              "timestamp"  : datetime.datetime.utcnow().isoformat() + "Z",
+              "theorem"    : "Sum of two even numbers is even",
+              "method"     : "Direct proof",
+              "status"     : "VERIFIED",
+              "artifacts"  : ["dist/report.txt", "dist/report.pdf"]
+          }
+
+          with open("dist/manifest.json", "w") as f:
+              json.dump(manifest, f, indent=2)
+
+          print("[OK] Release manifest yaradıldı")
+          print(json.dumps(manifest, indent=2))
+          EOF
+
+      - name: Show dist contents
+        run: ls -lh dist/
+
+      - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: math-proof-report
+          name: math-proof-report-v${{ github.run_number }}
           path: dist/
+          retention-days: 14
 
-      - name: Deployment simulation
+      - name: Deployment simulation log
         run: |
-          echo "CD SUCCESS "
-          echo "Report generated in dist/"
-          echo "Artifact uploaded to GitHub"
-          echo "No real deployment (simulation)"
+          echo " DEPLOYMENT SIMULATION — SUCCESS "
+          echo "  Project   : math-theorem-proof"
+          echo "  Commit    : ${{ github.sha }}"
+          echo "  Artifacts : dist/"
+          echo "  Status    : DEPLOYED (simulation) ✓"
+          echo "  Note      : No real server — academic pipeline"
